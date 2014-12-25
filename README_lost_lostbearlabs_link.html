@@ -1,0 +1,209 @@
+<h1>Using the Minecraft API without a Raspberry Pi -- CraftBukkit and
+RaspberryJuice</h1>
+
+<i><small>Note: This was salvaged from <a href="http://blog.lostbearlabs.com/2013/04/25/using-the-minecraft-api-without-a-raspberry-pi-craftbukkit-and-raspberryjuice/" target="_blank">this currently defunct link</a> from the now-lost lostbearlabs.com</small></i>
+
+<h3>Introduction</h3>
+
+<p>
+    <a href="http://pi.minecraft.net/" target="_blank">The Pi Edition of Minecraft</a>
+     includes <a href="http://www.stuffaboutcode.com/2013/01/raspberry-pi-minecraft-api-basics.html">a simple wire protocol API with bindings in Python</a>.
+     (Bindings in other languages are also available, for example
+    <a href="https://github.com/Gadgetoid/Ruby-mcapi/" target="_blank">here is one
+    for Ruby</a>.
+    The language-specific APIs are just wrappers around some string commands
+    that are transmitted to the Minecraft server via TCP/IP.  The Minecraft
+    installation includes a description of the full syntax.)
+</p>
+<p>
+    If you don't have a <a href="http://www.raspberrypi.org/" target="_blank">Raspberry Pi</a>,
+    then you can't currently use the official Minecraft API.  (The desktop
+    versions of the game don't support it.)  This post describes how to get started with
+    <a href="http://dl.bukkit.org/" target="_blank">CraftBukkit</a> (an
+    open-source replacement for the Minecraft server) and
+    <a href="http://dev.bukkit.org/server-mods/raspberryjuice/" target="_blank">Raspberry Juice</a>
+    (a CraftBukkit plugin that emulates the Minecraft API support) so that you can
+    run Minecraft API programs using your desktop environment.
+</p>
+<p>
+    These instructions were developed on a Mac, but they should be easily
+    adaptable to other environments.
+</p>
+
+<h3>Running CraftBukkit</h3>
+
+<p>
+    There are good instructions for downloading and installing CraftBukkit at
+    <a href="http://wiki.bukkit.org/Setting_up_a_server" target="_blank">http://wiki.bukkit.org/Setting_up_a_server</a>.
+</p>
+<p>
+    I am running the most recent version of Minecraft (currently v1.5.1) so the
+    most recent "recommended" version of CraftBukkit is not yet compatible.
+    Therefore I looked at the
+    <a href="http://dl.bukkit.org/downloads/craftbukkit/" target="_blank">download page</a>
+    and selected the most recent "Beta Build" version for v1.5.1
+    (<a href="http://dl.bukkit.org/downloads/craftbukkit/" target="_blank">currently v1.5.1-RO2</a>)
+    and put this into my BukketServer folder.  I then modified my <i>start.command</i> file
+    (as described in the instructions above) to load this
+    version instead of the default version by writing:
+</p>
+<pre>java -Xms1024M -Xmx1024M -jar craftbukkit-1.5.1-R0.2.jar -o true</pre>
+<p>
+    With my <i>start.command</i> file set up, I can then start the server by using a
+    terminal window and typing:
+</p>
+<pre>cd ~/Desktop/BukkitServer
+
+./start-server</pre>
+
+<p>
+    The server runs as a console program within the terminal window.  To stop
+    the server, I type
+</p>
+<pre>stop</pre>
+<p>
+    For a list of other available commands, you can type
+</p>
+<pre>help</pre>
+
+<p>
+    (The commands can also be used via Minecraft chat, but since I'm already
+    switching around to my code window and keeping an eye on the terminal while
+    coding, it's just as easy to use this console directly.)
+</p>
+
+<h3>Connecting To Your Server</h3>
+
+<p>
+    When you start Minecraft, select "Multiplayer" mode, and then define a
+    server with the following properties:
+</p>
+
+<img src="ignoreme/EditServerInfo.png"/>
+
+<p>
+    When you then click the "Join Server" button, you will see
+    a connection message in your CraftBukkit console window:
+</p>
+<pre>11:45:41 [INFO] TestUser[/127.0.0.1:58901] logged in with entity
+  id 150 at ([world] -236.2425485963545, 67.0, 232.225211454399)</pre>
+
+<h3>The Raspberry Juice Plugin</h3>
+
+<p>
+    Once you have a working server and can connect to it, you are ready to add
+    the Raspberry Juice plugin that implements the Minecraft API.
+</p>
+<p>
+    Announcements about this plugin can be found
+    <a href="http://www.minecraftforum.net/topic/1617715-raspberryjuice-plugin-to-implement-minecraft-pi-api-for-desktop-bukkit-servers/" target="_blank">here</a>
+    and the source code is on
+    <a href="https://github.com/zhuowei/RaspberryJuice" target="_blank">GitHub</a>.
+</p>
+<p>
+    To install it, find the download link at the main plugin page,
+    <a href="http://dev.bukkit.org/server-mods/raspberryjuice/" target="_blank">http://dev.bukkit.org/server-mods/raspberryjuice/</a>.
+    This will download a JAR file (currently <b>raspberryjuice-1.2.jar</b>).  Copy
+    this JAR file into the folder called <b>plugins</b> under your main CraftBukkit
+    folder.
+</p>
+<p>
+    Now when you restart your server, you should see a message like this and
+    you are good to go:
+</p>
+<pre>1:44:02 [INFO] [RaspberryJuice] Enabling RaspberryJuice v1.2</pre>
+
+<h3>Imitating Creative Mode</h3>
+<p>
+    If your main goal is to experiment with script programming, then you may
+    not want to deal with monsters, night-time, etc.  (This is how the Pi
+    edition works... it runs only in creative mode.)
+</p>
+<p>
+    To make your server default to monster-free, creative mode play, locate the
+    file <b>server.properties</b> in your main CraftBukkit folder and set the
+    following values:
+</p>
+<pre>gamemode=3D1
+spawn-monsters=3Dfalse
+spawn-animals=3Dfalse
+difficulty=3D0
+allow-flight=3Dtrue
+</pre>
+<p>
+    (Note:  the allow-flight setting is important.  If you don't enable it,
+    and then you run a script that erases the ground beneath you, the server
+    will kick you out for "illegally" flying!)
+</p>
+<p>
+    To get rid of day/night transitions, install the <a href="http://dev.bukkit.org/server-mo=
+    ds/always-day/" target="_blank">Always Day</a> plugin
+    (copy the JAR file to your <b>plugins</b> folder).  Then just type the command
+    "day" in your server's console window.
+</p>
+
+<h3>Installing the Minecraft API</h3>
+
+<p>
+    When you download <a href="http://pi.minecraft.net/" target="_blank">Minecraft: Pi Edition</a>,
+    you will get a file called <b>minecraft-pi-0.1.1.tar.gz</b>.  Extract this file, and
+    you will get a folder called <b>mcpi</b>  Within this is a subfolder called
+    <b>mcpi/api/python/mcpi</b>.  This is the python API, and you can copy it around
+    freely to your development folder.
+</p>
+<p>
+    Note that the neighboring folder, <b>mcpi/api/python/spec</b>, contains the
+    description of the wire format used to send API commands to the server.
+</p>
+
+<h3>Writing your First Program</h3>
+<p>
+    First, create a development folder for yourself, for example you could call
+    it <b>mcdev</b>:
+</p>
+<pre>mkdir mcdev</pre>
+<p>
+    Now copy your downloaded API into this folder:
+</p>
+<pre>cd mcdev
+cp -r ~/Downloads/mcpi/api/python/mcpi .</pre>
+<p>
+    Within this folder, create a file called <b>test1.py</b> with the following contents:
+</p>
+<pre># Sample program to create a pillar
+
+import mcpi.minecraft as minecraft
+import mcpi.block as block
+
+# Connect to the Minecraft server
+world = minecraft.Minecraft.create()
+
+# Get the player's current position and store the coordinates
+[x,y,z] = world.player.getPos()
+
+# Set some variables to customize your pillar
+height = 3
+material = block.BRICK_BLOCK
+
+# Build the pillar. It will be "height" blocks high and located one
+step away from the player.
+for level in range(0, height):
+    world.setBlock(x+1, y+level, z+1, material)
+    level = level + 1;
+</pre>
+<p>
+    (NOTE:  if you're not a Python programmer [yet!] then be aware that the
+    indentation in the last two lines is important. These two lines must each
+    be indented at the beginning with a tab (or 2 spaces) exactly as shown.
+    Unlike many other languages, Python pays attention to whitespace.)
+</p>
+<p>
+Finally, execute your program by typing the following at the command line
+from within your <b>mcdev</b> folder.
+</p>
+<pre>python test1.py</pre>
+
+<p>When you return to the game, your character will be standing next to a
+small brick pillar!</p>
+
+<img src="ignoreme/Pillar.png"/>
